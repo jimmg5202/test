@@ -163,6 +163,14 @@ if (body) {
                 console.log("homefeed: " + E)
             }
             break;
+	  case /api\/sns\/v\d\/homefeed\?/.test($request.url):
+	    try {
+	      let z = JSON.parse(body);
+	      z.data = z.data.filter(z => z.model_type!== 'live_v2'), body = JSON.stringify(z)
+	    } catch (E) {
+	      console.log("homefeed: " + E)
+	    }
+	    break;
         case /api\/sns\/v\d\/system_service\/config\?/.test($request.url):
             try {
                 let x = JSON.parse(body),
