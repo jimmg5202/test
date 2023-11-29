@@ -149,7 +149,7 @@ if (body) {
             try {
                 let q = JSON.parse(body);
                 q.data = q.data.filter(e => !e.is_ads && e.model_type !== 'live_v2');
-                if (q.data.user.live) {
+                if (q.data.user.live !== undefined) {
                     delete q.data.user.live;
                 }
                 body = JSON.stringify(q)
