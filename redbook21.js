@@ -1,4 +1,3 @@
-
 let body = $response.body;
 if (body) {
     switch (!0) {
@@ -148,7 +147,7 @@ if (body) {
         case /api\/sns\/v\d\/homefeed\?/.test($request.url):
             try {
                 let q = JSON.parse(body);
-                 q.data = q.data.filter(e => !e.is_ads && e.model_type !== 'live_v2'), body = JSON.stringify(q)
+                q.data = q.data.filter(e => !e.is_ads && e.model_type == 'note'), body = JSON.stringify(q)
             } catch (E) {
                 console.log("homefeed: " + E)
             }
