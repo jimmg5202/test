@@ -155,11 +155,13 @@ if (body) {
         case /api\/sns\/v\d\/homefeed\?/.test($request.url):
             try {
                 let T = JSON.parse(body);
-			     V = ["live"];
-                 for (let O of V) t.data?.[O] && delete t.data[O];              
+		let user = T.user;
+		    if (user && user.live) {
+			delete user.live;
+		    }
                     body = JSON.stringify(T);
             } catch (T) {
-                console.log("homefeed: " + T);
+                console.log("homefeed-live: " + T);
             }
             break;
         case /api\/sns\/v\d\/system_service\/config\?/.test($request.url):
