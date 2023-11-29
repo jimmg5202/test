@@ -156,9 +156,7 @@ if (body) {
             try {
                 let T = JSON.parse(body);
 			     V = ["live"];
-                 for (let O of C) { 
-				  t.data?.[O] && delete t.data[O]; 
-                }                 
+                 for (let O of V) t.data?.[O] && delete t.data[O];              
                     body = JSON.stringify(T);
             } catch (T) {
                 console.log("homefeed: " + T);
