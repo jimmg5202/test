@@ -148,7 +148,10 @@ if (body) {
         case /api\/sns\/v\d\/homefeed\?/.test($request.url):
             try {
                 let q = JSON.parse(body);
-                q.data = q.data.filter(e => !e.is_ads && e.model_type !== 'live_v2'),
+                q.data = q.data.filter(e => !e.is_ads && e.model_type !== 'live_v2');
+                if (q.data.user.live !== undefined && q.data.user.live!== null) {
+                    delete q.data.user.live;
+                }
                 body = JSON.stringify(q)
             } catch (E) {
                 console.log("homefeed: " + E)
