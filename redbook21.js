@@ -156,9 +156,9 @@ if (body) {
             try {
                 let q = JSON.parse(body);
                 q.data = q.data.filter(e => !e.is_ads && e.model_type == 'note');
-                if (e.user.live_status === 1) {
-                    e.user.live_status === 2;
-                }                    
+                if (q.data && q.data.user && q.data.user.live_status === 1) {
+                    q.data.user.live_status = 2;
+                }                   
                     body = JSON.stringify(q);
             } catch (E) {
                 console.log("homefeed: " + E);
