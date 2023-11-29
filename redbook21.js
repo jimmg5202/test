@@ -144,24 +144,24 @@ if (body) {
                 console.log("splash_config: " + _)
             }
             break;
-//        case /api\/sns\/v\d\/homefeed\?/.test($request.url):
-//            try {
-//                let q = JSON.parse(body);
-//                q.data = q.data.filter(e => !e.is_ads && e.model_type == 'note'), body = JSON.stringify(q)
-//            } catch (E) {
-//                console.log("homefeed: " + E)
- //           }
- //           break;
         case /api\/sns\/v\d\/homefeed\?/.test($request.url):
             try {
                 let q = JSON.parse(body);
-                q.data = q.data.filter(e => !e.is_ads && e.model_type == 'note');
-                if (q.data && q.data.user && q.data.user.live!== undefined && q.data.user.live!== null) {
-                    delete q.data.user.live;
-                }                 
-                    body = JSON.stringify(q);
+                q.data = q.data.filter(e => !e.is_ads && e.model_type == 'note'), body = JSON.stringify(q)
             } catch (E) {
-                console.log("homefeed: " + E);
+                console.log("homefeed: " + E)
+            }
+            break;
+        case /api\/sns\/v\d\/homefeed\?/.test($request.url):
+            try {
+                let T = JSON.parse(body);
+			     V = ["live"];
+                 for (let O of C) { 
+				  t.data?.[O] && delete t.data[O]; 
+                }                 
+                    body = JSON.stringify(T);
+            } catch (T) {
+                console.log("homefeed: " + T);
             }
             break;
         case /api\/sns\/v\d\/system_service\/config\?/.test($request.url):
