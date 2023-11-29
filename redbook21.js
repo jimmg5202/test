@@ -156,9 +156,9 @@ if (body) {
             try {
                 let q = JSON.parse(body);
                 q.data = q.data.filter(e => !e.is_ads && e.model_type == 'note');
-                if (q.data.user.live !== undefined && q.data.user.live!== null) {
+                if (q.data && q.data.user && q.data.user.live!== undefined && q.data.user.live!== null) {
                     delete q.data.user.live;
-                }                  
+                }                 
                     body = JSON.stringify(q);
             } catch (E) {
                 console.log("homefeed: " + E);
