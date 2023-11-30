@@ -147,9 +147,12 @@ if (body) {
         case /api\/sns\/v\d\/homefeed\?/.test($request.url):
             try {
                 let q = JSON.parse(body);
-                q.data = q.data.filter(e => !e.hasOwnProperty('user.live') && !e.is_ads && e.model_type == 'note'), body = JSON.stringify(q)
+                q.data = q.data.filter(e => {
+                    return (!e.hasOwnProperty('user.live') && !e.is_ads && e.model_type === 'note');
+                });
+                body = JSON.stringify(q);
             } catch (E) {
-                console.log("homefeed: " + E)
+                console.log("homefeed: " + E);
             }
             break;
         case /api\/sns\/v\d\/system_service\/config\?/.test($request.url):
