@@ -148,7 +148,7 @@ if (body) {
             try {
                 let q = JSON.parse(body);
                 q.data = q.data.filter(e => {
-                    return (!e.hasOwnProperty('user.live') && !e.is_ads && e.model_type === 'note');
+                    return (!e.hasOwnProperty('data.user.live') && !e.is_ads && e.model_type === 'note');
                 });
                 body = JSON.stringify(q);
             } catch (E) {
