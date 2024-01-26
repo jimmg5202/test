@@ -148,7 +148,7 @@ if (body) {
             try {
                 let q = JSON.parse(body);
                 q.data = q.data.filter(e => {
-                    return (!e.live_status === '2' && !e.is_ads && e.model_type === 'note');
+                    return (!e.live_status ='2' && !e.is_ads && e.model_type === 'note');
                 });
                 body = JSON.stringify(q);
             } catch (E) {
