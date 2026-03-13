@@ -1,0 +1,265 @@
+var WidgetMetadata = {
+  id: "jable_int",
+  title: "Jable",
+  description: "修复声音&恢复大量分类",
+  author: "nibiru｜MakkaPakka｜蝴蝶",
+  site: "https://widgets-xd.vercel.app",
+  version: "1.3.1",
+  modules: [
+    {
+      title: "搜索",
+      description: "搜索",
+      functionName: "search",
+      cacheDuration: 3600,
+      params: [
+        {
+          name: "keyword",
+          label: "关键词",
+          type: "string",
+          description: "关键词"
+        },
+        {
+          name: "sort_by",
+          label: "排序",
+          type: "enum",
+          description: "排序",
+          enumOptions: [
+            { title: "最多观看", value: "video_viewed" },
+            { title: "近期最佳", value: "post_date_and_popularity" },
+            { title: "最近更新", value: "post_date" },
+            { title: "最多收藏", value: "most_favourited" }
+          ]
+        },
+        { name: "from", label: "页码", type: "page", description: "页码", defaultValue: "1" }
+      ]
+    },
+    {
+      title: "热门",
+      description: "热门影片",
+      functionName: "loadPage",
+      cacheDuration: 3600,
+      params: [
+        {
+          name: "url",
+          label: "列表地址",
+          type: "enum",
+          description: "列表地址",
+          defaultValue: "https://jable.tv/hot/?mode=async&function=get_block&block_id=list_videos_common_videos_list",
+          enumOptions: [
+            { title: "今日热门", value: "https://jable.tv/hot/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=video_viewed_today" },
+            { title: "本周热门", value: "https://jable.tv/hot/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=video_viewed_week" },
+            { title: "本月热门", value: "https://jable.tv/hot/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=video_viewed_month" },
+            { title: "所有时间", value: "https://jable.tv/hot/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=video_viewed" }
+          ]
+        },
+        { name: "from", label: "页码", type: "page", description: "页码", defaultValue: "1" }
+      ]
+    },
+    {
+      title: "最新",
+      description: "最新上市影片",
+      functionName: "loadPage",
+      cacheDuration: 3600,
+      params: [
+        {
+          name: "url",
+          label: "列表地址",
+          type: "enum",
+          description: "列表地址",
+          defaultValue: "https://jable.tv/new-release/?mode=async&function=get_block&block_id=list_videos_common_videos_list",
+          enumOptions: [
+            { title: "最新发布", value: "https://jable.tv/new-release/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=latest-updates" },
+            { title: "最多观看", value: "https://jable.tv/new-release/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=video_viewed" },
+            { title: "最多收藏", value: "https://jable.tv/new-release/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=most_favourited" }
+          ]
+        },
+        { name: "from", label: "页码", type: "page", description: "页码", defaultValue: "1" }
+      ]
+    },
+    {
+      title: "中文",
+      description: "中文字幕影片",
+      functionName: "loadPage",
+      cacheDuration: 3600,
+      params: [
+        {
+          name: "url",
+          label: "列表地址",
+          type: "enum",
+          description: "列表地址",
+          defaultValue: "https://jable.tv/categories/chinese-subtitle/?mode=async&function=get_block&block_id=list_videos_common_videos_list",
+          enumOptions: [
+            { title: "最近更新", value: "https://jable.tv/categories/chinese-subtitle/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=post_date" },
+            { title: "最多观看", value: "https://jable.tv/categories/chinese-subtitle/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=video_viewed" },
+            { title: "最多收藏", value: "https://jable.tv/categories/chinese-subtitle/?mode=async&function=get_block&block_id=list_videos_common_videos_list&sort_by=most_favourited" }
+          ]
+        },
+        { name: "from", label: "页码", type: "page", description: "页码", defaultValue: "1" }
+      ]
+    }
+  ]
+};
+
+function safeJson(data) {
+  if (typeof data === "string") {
+    try {
+      return JSON.parse(data);
+    } catch (_) {
+      return {};
+    }
+  }
+  return data || {};
+}
+
+function ensureArray(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+async function search(params) {
+  params = params || {};
+  var keyword = encodeURIComponent(params.keyword || "");
+  
+  var url = "https://jable.tv/search/" + keyword + "/?mode=async&function=get_block&block_id=list_videos_videos_list_search_result&q=" + keyword;
+  
+  if (params.sort_by) {
+    url += "&sort_by=" + params.sort_by;
+  }
+  
+  if (params.from) {
+    url += "&from=" + params.from;
+  }
+  
+  return await loadPage({ url: url, from: params.from });
+}
+
+async function loadPage(params) {
+  params = params || {};
+  var sections = await loadPageSections(params);
+  var items = [];
+  for (var i = 0; i < sections.length; i++) {
+    items = items.concat(sections[i].childItems);
+  }
+  return items;
+}
+
+async function loadPageSections(params) {
+  params = params || {};
+  try {
+    var url = params.url;
+    if (!url) {
+      console.error("地址不能为空");
+      return [];
+    }
+    if (params["sort_by"]) {
+      url += "&sort_by=" + params.sort_by;
+    }
+    if (params["from"]) {
+      url += "&from=" + params.from;
+    }
+    
+    var response = await Widget.http.get(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+      }
+    });
+
+    if (!response || !response.data || typeof response.data !== "string") {
+      console.error("无法获取有效的HTML内容");
+      return [];
+    }
+
+    var htmlContent = response.data;
+    return parseHtml(htmlContent);
+  } catch (error) {
+    console.error("测试过程出错: " + error.message);
+    return [];
+  }
+}
+
+async function parseHtml(htmlContent) {
+  var docId = Widget.dom.parse(htmlContent);
+  var sectionElements = Widget.dom.select(docId, ".site-content .py-3,.pb-e-lg-40");
+  var itemSelector = ".video-img-box";
+  var coverSelector = "img";
+  var durationSelector = ".absolute-bottom-right .label";
+  var titleSelector = ".title a";
+  
+  var sections = [];
+  
+  for (var i = 0; i < sectionElements.length; i++) {
+    var sectionElement = sectionElements[i];
+    var items = [];
+    var titleElements = Widget.dom.select(sectionElement, ".title-box .h3-md");
+    var sectionTitleText = titleElements.length > 0 ? Widget.dom.text(titleElements[0]) : "";
+    var itemElements = Widget.dom.select(sectionElement, itemSelector);
+    
+    if (itemElements && itemElements.length > 0) {
+      for (var j = 0; j < itemElements.length; j++) {
+        var itemElement = itemElements[j];
+        var titleIdElements = Widget.dom.select(itemElement, titleSelector);
+        var url = titleIdElements.length > 0 ? Widget.dom.attr(titleIdElements[0], "href") || "" : "";
+        
+        if (url && url.indexOf("jable.tv") >= 0) {
+          var durationIdElements = Widget.dom.select(itemElement, durationSelector);
+          var coverIdElements = Widget.dom.select(itemElement, coverSelector);
+          var cover = coverIdElements.length > 0 ? Widget.dom.attr(coverIdElements[0], "data-src") : "";
+          var video = coverIdElements.length > 0 ? Widget.dom.attr(coverIdElements[0], "data-preview") : "";
+          var title = titleIdElements.length > 0 ? Widget.dom.text(titleIdElements[0]) : "";
+          var duration = durationIdElements.length > 0 ? Widget.dom.text(durationIdElements[0]).trim() : "";
+          
+          var item = {
+            id: url,
+            title: title,
+            posterUrl: cover,
+            backdropUrl: cover,
+            link: url,
+            mediaType: "movie",
+            description: duration
+          };
+          items.push(item);
+        }
+      }
+    }
+    
+    if (items.length > 0) {
+      sections.push({
+        title: sectionTitleText,
+        childItems: items
+      });
+    }
+  }
+  
+  Widget.dom.remove(docId);
+  return sections;
+}
+
+async function loadDetail(link) {
+  try {
+    var response = await Widget.http.get(link, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "Referer": "https://jable.tv/"
+      }
+    });
+    
+    var hlsUrl = "";
+    var match = response.data.match(/var\s+hlsUrl\s*=\s*['"](.*?)['"]/i);
+    if (match && match[1]) {
+      hlsUrl = match[1];
+    }
+
+    if (!hlsUrl) {
+      console.error("无法获取有效的播放地址");
+      return [];
+    }
+    
+    return [{
+      title: "",
+      videoUrl: hlsUrl
+    }];
+  } catch (error) {
+    console.error("加载详情失败: " + error.message);
+    return [];
+  }
+}
