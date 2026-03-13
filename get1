@@ -1,0 +1,473 @@
+var WidgetMetadata = {
+  id: "javday_pro_final_mak",
+  title: "JAVDay_ovo",
+  description: "简易的javday模块",
+  author: "𝙈𝙖𝙠𝙠𝙖𝙋𝙖𝙠𝙠𝙖",
+  site: "https://javday.app",
+  version: "1.0.3",
+  modules: [
+    {
+      title: "搜索视频",
+      description: "搜索JAVDay视频库",
+      functionName: "search",
+      cacheDuration: 3600,
+      params: [
+        {
+          name: "keyword",
+          label: "女優/番號/關鍵字搜索…",
+          type: "string",
+          defaultValue: "",
+          description: "女優/番號/關鍵字搜索…"
+        },
+        { 
+          name: "page", 
+          label: "页码", 
+          type: "page",
+          description: "搜索结果页码" 
+        }
+      ]
+    },
+    {
+      title: "榜单",
+      description: "最新、热门及新作榜单",
+      functionName: "loadPage",
+      cacheDuration: 3600,
+      params: [
+        {
+          name: "url",
+          label: "选择榜单",
+          type: "enum",
+          defaultValue: "https://javday.app/label/new/",
+          enumOptions: [
+            { title: "🆕 最新更新", value: "https://javday.app/label/new/" },
+            { title: "🔥 人气系列", value: "https://javday.app/label/hot/" },
+            { title: "💿 新作上市", value: "https://javday.app/category/new-release/" }
+          ]
+        },
+        {
+          name: "sort_by",
+          label: "排序方式",
+          type: "enum",
+          defaultValue: "new",
+          enumOptions: [
+            { title: "最新上架", value: "new" },
+            { title: "人气最高", value: "popular" }
+          ],
+          description: "针对新作上市等分类有效"
+        },
+        {
+          name: "page",
+          label: "页码",
+          type: "page"
+        }
+      ]
+    },
+    {
+      title: "类型选择",
+      description: "有码、无码、流出及杏吧",
+      functionName: "loadPage",
+      cacheDuration: 3600,
+      params: [
+        {
+          name: "url",
+          label: "选择类型",
+          type: "enum",
+          defaultValue: "https://javday.app/category/uncensored/",
+          enumOptions: [
+            { title: "🔞 无码视频", value: "https://javday.app/category/uncensored/" },
+            { title: "🛡️ 有码视频", value: "https://javday.app/category/censored/" },
+            { title: "💦 无码流出", value: "https://javday.app/category/uncensored-leaked/" },
+            { title: "🎱 杏吧视频", value: "https://javday.app/category/sex8/" }
+          ]
+        },
+        {
+          name: "sort_by",
+          label: "排序方式",
+          type: "enum",
+          defaultValue: "new",
+          enumOptions: [
+            { title: "最新上架", value: "new" },
+            { title: "人气最高", value: "popular" }
+          ]
+        },
+        {
+          name: "page",
+          label: "页码",
+          type: "page"
+        }
+      ]
+    },
+    {
+      title: "国产",
+      description: "玩偶姐姐、国产AV及各大厂商",
+      functionName: "loadPage",
+      cacheDuration: 3600,
+      params: [
+        {
+          name: "url",
+          label: "选择分类/厂商",
+          type: "enum",
+          defaultValue: "https://javday.app/category/hongkongdoll/",
+          enumOptions: [
+            { title: "👯 玩偶姐姐", value: "https://javday.app/category/hongkongdoll/" },
+            { title: "🇨🇳 国产 AV", value: "https://javday.app/category/chinese-av/" },
+            { title: "麻豆传媒", value: "https://javday.app/index.php/category/madou/" }, 
+            { title: "果冻传媒", value: "https://javday.app/index.php/category/91zhipianchang/" }, 
+            { title: "天美传媒", value: "https://javday.app/index.php/category/timi/" }, 
+            { title: "星空无限", value: "https://javday.app/index.php/category/xingkong/" }, 
+            { title: "皇家华人", value: "https://javday.app/index.php/category/royalasianstudio/" }, 
+            { title: "蜜桃影像", value: "https://javday.app/index.php/category/mtgw/" }, 
+            { title: "精东影业", value: "https://javday.app/index.php/category/jdav/" }, 
+            { title: "台湾 AV", value: "https://javday.app/index.php/category/twav/" }, 
+            { title: "JVID", value: "https://javday.app/index.php/category/jvid/" }, 
+            { title: "萝莉社", value: "https://javday.app/index.php/category/luolisheus/" }, 
+            { title: "糖心VLOG", value: "https://javday.app/index.php/category/txvlog/" }, 
+            { title: "Psychoporn TW", value: "https://javday.app/index.php/category/psychoporn-tw/" } 
+          ]
+        },
+        {
+          name: "sort_by",
+          label: "排序方式",
+          type: "enum",
+          defaultValue: "new",
+          enumOptions: [
+            { title: "最新上架", value: "new" },
+            { title: "人气最高", value: "popular" }
+          ]
+        },
+        {
+          name: "page",
+          label: "页码",
+          type: "page"
+        }
+      ]
+    }
+  ]
+};
+
+var JAVDAY_LOG_PREFIX = "ForwardWidget: JAVDay -";
+var JAVDAY_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36";
+
+function safeJson(data) {
+  if (typeof data === "string") {
+    try {
+      return JSON.parse(data);
+    } catch (_) {
+      return {};
+    }
+  }
+  return data || {};
+}
+
+function ensureArray(v) {
+  return Array.isArray(v) ? v : [];
+}
+
+function extractCategoryId(url) {
+  var match = url.match(/\/([^/]+)\/?$/);
+  if (match && match[1]) {
+    return match[1].replace(/\/+$/, '');
+  }
+  
+  var parts = url.split('/').filter(function(part) { return part.length > 0; });
+  return parts[parts.length - 1] || url.split('/').slice(-2, -1)[0] || 'unknown';
+}
+
+function buildPageUrl(baseUrl, sortBy, page) {
+  var categoryId = extractCategoryId(baseUrl);
+  
+  var cleanBaseUrl = baseUrl.replace(/index\.php\//g, '');
+  
+  var path;
+  if (sortBy === "popular") {
+    path = "/fiter/by/hits/id/" + categoryId;
+  } else {
+    path = cleanBaseUrl.indexOf('label/') >= 0 
+      ? cleanBaseUrl.replace(/\/page\/\d+\/?$/, '')
+      : "/category/" + categoryId;
+  }
+  
+  if (page > 1) {
+    return path + "/page/" + page + "/";
+  }
+  
+  return path + "/";
+}
+
+function getFullUrl(path) {
+  if (path.indexOf("http") === 0) return path;
+  
+  return "https://javday.app" + path;
+}
+
+function getCoverImgSrc(docId, item) {
+  var coverElements = Widget.dom.select(docId, ".videoBox-cover");
+  if (coverElements.length === 0) return "";
+  
+  var styleAttr = Widget.dom.attr(coverElements[0], "style");
+  
+  if (styleAttr) {
+    var match = styleAttr.match(/url\(\s*['"]?([^'")]+)['"]?\s*\)/);
+    if (match && match[1]) {
+      var extractedUrl = match[1];
+      
+      if (extractedUrl.indexOf("//") === 0) {
+        return "https:" + extractedUrl;
+      } 
+      
+      if (extractedUrl.indexOf("http") === 0) {
+        return extractedUrl;
+      }
+      
+      return "https://javday.app" + (extractedUrl.indexOf("/") === 0 ? "" : "/") + extractedUrl;
+    }
+  }
+  return "";
+}
+
+function extractVideoUrlFromDPlayerScript(scriptContent) {
+  if (!scriptContent) return null;
+  
+  var regexes = [
+    /video\s*:\s*{\s*[^}]*url\s*:\s*['"]([^'"]+)['"]/,
+    /url\s*:\s*['"]([^'"]+\.m3u8[^'"]*)['"]/
+  ];
+  
+  for (var i = 0; i < regexes.length; i++) {
+    var match = scriptContent.match(regexes[i]);
+    if (match && match[1]) return match[1];
+  }
+  
+  return null;
+}
+
+async function loadPage(params) {
+  params = params || {};
+  var baseUrl = params.url;
+  var sortBy = params.sort_by || "new";
+  var page = parseInt(params.page, 10) || 1;
+  
+  var pagePath = buildPageUrl(baseUrl, sortBy, page);
+  var targetUrl = getFullUrl(pagePath);
+
+  try {
+    var response = await Widget.http.get(targetUrl, {
+      headers: {
+        "User-Agent": JAVDAY_USER_AGENT,
+        "Referer": "https://javday.app/"
+      }
+    });
+
+    if (!response || !response.data) {
+      console.error(JAVDAY_LOG_PREFIX + " 无法获取页面内容");
+      return [];
+    }
+
+    var docId = Widget.dom.parse(response.data);
+    var videoItems = [];
+    var videoBoxes = Widget.dom.select(docId, ".video-wrapper .videoBox");
+
+    for (var index = 0; index < videoBoxes.length; index++) {
+      var item = videoBoxes[index];
+      var linkElements = Widget.dom.select(item, "a[href]");
+      var titleElements = Widget.dom.select(item, ".videoBox-info .title");
+      
+      if (linkElements.length === 0 || titleElements.length === 0) continue;
+      
+      var link = Widget.dom.attr(linkElements[0], "href");
+      var title = Widget.dom.text(titleElements[0]).trim();
+      var imgSrc = getCoverImgSrc(docId, item);
+
+      if (!link || !title) continue;
+      
+      if (link.indexOf("http") !== 0) {
+        link = link.indexOf("//") === 0 
+          ? "https:" + link
+          : "https://javday.app" + (link.indexOf("/") === 0 ? "" : "/") + link;
+      }
+
+      link = link.replace(/([^:]\/)\/+/g, '$1');
+
+      videoItems.push({
+        id: String(index) + "|" + link,
+        title: title,
+        posterUrl: imgSrc,
+        backdropUrl: imgSrc,
+        link: link,
+        description: "来自JAVDay | 排序:" + (sortBy === "new" ? "最新上架" : "人气最高"),
+        mediaType: "movie"
+      });
+    }
+    
+    Widget.dom.remove(docId);
+    return videoItems;
+  } catch (error) {
+    console.error(JAVDAY_LOG_PREFIX + " 获取视频失败: " + error.message);
+    return [];
+  }
+}
+
+async function search(params) {
+  params = params || {};
+  var keyword = params.keyword || "";
+  var page = parseInt(params.page, 10) || 1;
+  
+  if (!keyword) {
+    console.error(JAVDAY_LOG_PREFIX + " 请输入搜索关键词");
+    return [];
+  }
+
+  var searchUrl;
+  if (page === 1) {
+    searchUrl = "https://javday.app/search/?wd=" + encodeURIComponent(keyword);
+  } else {
+    searchUrl = "https://javday.app/search/page/" + page + "/wd/" + encodeURIComponent(keyword) + "/";
+  }
+
+  try {
+    var response = await Widget.http.get(searchUrl, {
+      headers: {
+        "User-Agent": JAVDAY_USER_AGENT,
+        "Referer": "https://javday.app/"
+      }
+    });
+
+    if (!response || !response.data) {
+      console.error(JAVDAY_LOG_PREFIX + " 无法获取搜索结果");
+      return [];
+    }
+
+    var docId = Widget.dom.parse(response.data);
+    var videoItems = [];
+    var videoBoxes = Widget.dom.select(docId, ".video-wrapper .videoBox");
+
+    for (var index = 0; index < videoBoxes.length; index++) {
+      var item = videoBoxes[index];
+      var linkElements = Widget.dom.select(item, "a[href]");
+      var titleElements = Widget.dom.select(item, ".videoBox-info .title");
+      
+      if (linkElements.length === 0 || titleElements.length === 0) continue;
+      
+      var link = Widget.dom.attr(linkElements[0], "href");
+      var title = Widget.dom.text(titleElements[0]).trim();
+      var imgSrc = getCoverImgSrc(docId, item);
+
+      if (!link || !title) continue;
+      
+      if (link.indexOf("http") !== 0) {
+        link = link.indexOf("//") === 0 
+          ? "https:" + link
+          : "https://javday.app" + (link.indexOf("/") === 0 ? "" : "/") + link;
+      }
+
+      link = link.replace(/([^:]\/)\/+/g, '$1');
+
+      videoItems.push({
+        id: String(index) + "|" + link,
+        title: title,
+        posterUrl: imgSrc,
+        backdropUrl: imgSrc,
+        link: link,
+        description: "搜索: " + params.keyword,
+        mediaType: "movie"
+      });
+    }
+    
+    Widget.dom.remove(docId);
+    return videoItems;
+  } catch (error) {
+    console.error(JAVDAY_LOG_PREFIX + " 搜索失败: " + error.message);
+    return [];
+  }
+}
+
+async function loadDetail(link) {
+  try {
+    var response = await Widget.http.get(link, {
+      headers: {
+        "User-Agent": JAVDAY_USER_AGENT,
+        "Referer": link
+      }
+    });
+
+    if (!response || !response.data) {
+      console.error(JAVDAY_LOG_PREFIX + " 无法获取详情页内容");
+      return [];
+    }
+
+    var docId = Widget.dom.parse(response.data);
+    var scriptElements = Widget.dom.select(docId, "script");
+    var videoUrl = null;
+    
+    for (var i = 0; i < scriptElements.length; i++) {
+      var scriptContent = Widget.dom.text(scriptElements[i]);
+      if (scriptContent && scriptContent.indexOf("new DPlayer") >= 0) {
+        videoUrl = extractVideoUrlFromDPlayerScript(scriptContent);
+        if (videoUrl) break;
+      }
+    }
+    
+    if (!videoUrl) {
+      var videoElements = Widget.dom.select(docId, "video#J_prismPlayer");
+      if (videoElements.length > 0) {
+        videoUrl = Widget.dom.attr(videoElements[0], "src");
+      }
+    }
+    
+    if (!videoUrl) {
+      var sourceElements = Widget.dom.select(docId, "source[src*='.m3u8']");
+      if (sourceElements.length > 0) {
+        videoUrl = Widget.dom.attr(sourceElements[0], "src");
+      }
+    }
+    
+    if (!videoUrl) {
+      var videoSrcElements = Widget.dom.select(docId, "video source");
+      if (videoSrcElements.length > 0) {
+        videoUrl = Widget.dom.attr(videoSrcElements[0], "src");
+      }
+    }
+    
+    if (!videoUrl) {
+      for (var j = 0; j < scriptElements.length; j++) {
+        var scriptContent = Widget.dom.text(scriptElements[j]);
+        if (scriptContent && scriptContent.indexOf(".m3u8") >= 0) {
+          var m3u8Match = scriptContent.match(/['"](https?:\/\/[^'"]+\.m3u8[^'"]*)['"]/);
+          if (m3u8Match && m3u8Match[1]) {
+            videoUrl = m3u8Match[1];
+            break;
+          }
+        }
+      }
+    }
+    
+    if (!videoUrl) {
+      var playerVideoElements = Widget.dom.select(docId, "video[src]");
+      if (playerVideoElements.length > 0) {
+        videoUrl = Widget.dom.attr(playerVideoElements[0], "src");
+      }
+    }
+    
+    if (!videoUrl) {
+      var iframeElements = Widget.dom.select(docId, "iframe[src*='player']");
+      if (iframeElements.length > 0) {
+        videoUrl = Widget.dom.attr(iframeElements[0], "src");
+      }
+    }
+
+    Widget.dom.remove(docId);
+
+    if (videoUrl) {
+      return [{
+        title: "",
+        videoUrl: videoUrl
+      }];
+    }
+
+    console.error(JAVDAY_LOG_PREFIX + " 无法找到视频源");
+    return [];
+  } catch (error) {
+    console.error(JAVDAY_LOG_PREFIX + " 加载详情失败: " + error.message);
+    return [];
+  }
+}
